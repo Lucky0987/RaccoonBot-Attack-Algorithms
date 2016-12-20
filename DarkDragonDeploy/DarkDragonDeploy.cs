@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace DarkDragonDeploy
 {
-    [AttackAlgorithm("DarkDragonDeploy", "Deploys Dragons and use Zap Quake To Maximize chance of Getting Dark Elixir Storage.")]
+    [AttackAlgorithm("DarkDragonDeploy", "Deploys Dragons and use Zap Quake To Maximize chance of Getting Townhall.")]
     internal class DarkDragonDeploy : BaseAttack
     {
 
@@ -22,7 +22,7 @@ namespace DarkDragonDeploy
 
         List<DeployElement>deployElements = null;
         const string Tag = "[Dark Dragon]";
-        Target darkElixirStorage;
+        Target townHall;
         PointFT[] deFunnelPoints;
         PointFT[] balloonFunnelPoints;
         AirDefense[] airDefenses;
@@ -90,12 +90,12 @@ namespace DarkDragonDeploy
 
             Log.Info($"{Tag} Base meets minimum Requirements... Checking DE Storage/Air Defense Locations...");
 
-            //Grab the Locations of the DE Storage
-            darkElixirStorage = HumanLikeAlgorithms.TargetDarkElixirStorage();
+            //Grab the Locations of the Town Hall
+            townHall = HumanLikeAlgorithms.TargetTownhall();
 
-            if (!darkElixirStorage.ValidTarget)
+            if (!townHall.ValidTarget)
             {
-                Log.Warning($"{Tag} No Dark Elixir Storage Found - Skipping");
+                Log.Warning($"{Tag} No Townhall Found - Skipping");
                 return 0;
             }
 
@@ -115,14 +115,14 @@ namespace DarkDragonDeploy
                 //Now that we found all Air Defenses, order them in the array with closest AD to Target first.
                 Array.Sort(airDefensesTest, delegate (AirDefense ad1, AirDefense ad2)
                 {
-                    return HumanLikeAlgorithms.DistanceFromPoint(ad1, darkElixirStorage.DeployGrunts)
-                    .CompareTo(HumanLikeAlgorithms.DistanceFromPoint(ad2, darkElixirStorage.DeployGrunts));
+                    return HumanLikeAlgorithms.DistanceFromPoint(ad1, townHall.DeployGrunts)
+                    .CompareTo(HumanLikeAlgorithms.DistanceFromPoint(ad2, townHall.DeployGrunts));
                 });
             }
 
             //Create the Funnel Points
-            deFunnelPoints = darkElixirStorage.GetFunnelingPoints(30);
-            balloonFunnelPoints = darkElixirStorage.GetFunnelingPoints(20);
+            deFunnelPoints = townHall.GetFunnelingPoints(30);
+            balloonFunnelPoints =townHall.GetFunnelingPoints(20);
 
 #if DEBUG
             //During Debug, Create an Image of the base including what we found.
@@ -298,7 +298,7 @@ namespace DarkDragonDeploy
                 //Draw some stuff on it.
                 Visualize.Axes(canvas);
                 Visualize.Grid(canvas, redZone: true);
-                Visualize.Target(canvas, darkElixirStorage.Center, 40, Color.Red);
+                Visualize.Target(canvas, townHall.Center, 40, Color.Red);
                 Visualize.Target(canvas, deFunnelPoints[0], 40, Color.White);
                 Visualize.Target(canvas, deFunnelPoints[1], 40, Color.White);
                 Visualize.Target(canvas, balloonFunnelPoints[0], 40, Color.Pink);
@@ -710,8 +710,8 @@ namespace DarkDragonDeploy
             if (rageSpells?.Count > 0)
             {
                 //Point on line between Center of DE Storage, and The Deploy Point of the Dragons... Such that the spell edge is near the DE Storage.
-                var rageDropPoint = darkElixirStorage.Center.PointOnLineAwayFromStart(darkElixirStorage.DeployGrunts, 6f);
-                Log.Info($"{Tag} Deploying ONE Rage Spell Close to DE Storage....");
+                var rageDropPoint = darkElixirStorage.Center.PointOnLineAwayFromStart(Townhall.DeployGrunts, 6f);
+                Log.Info($"{Tag} Deploying ONE Rage Spell Close to Townhall....");
                 foreach (var t in Deploy.AtPoint(rageSpells, rageDropPoint, 1))
                     yield return t;
             }
